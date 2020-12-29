@@ -3,22 +3,16 @@ package com.example.demo;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.util.Log;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
 import java.io.File;
-import java.util.Iterator;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     Intent intent ;
@@ -31,10 +25,20 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                  if (intent == null) {
-                      intent = new Intent(MainActivity.this, MyService2.class);
-                      startService(intent);
-                  }
+                if(Build.VERSION.SDK_INT >= 23) {
+                    if (!Settings.canDrawOverlays(MainActivity.this)) {
+                        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                Uri.parse("package:" + getPackageName()));
+                        startActivityForResult(intent, 1234);
+                    } else {
+                        CurrentActivity currentActivity = new CurrentActivity();
+                        currentActivity.getCurrentActivity();
+                        if (intent == null) {
+                            intent = new Intent(MainActivity.this, OverlayService.class);
+                            startService(intent);
+                        }
+                    }
+                }
             }
         });
     }
